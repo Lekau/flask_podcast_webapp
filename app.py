@@ -1,24 +1,36 @@
 from flask import Flask
-from flask_restful import Api, Resource 
+from flask_restful import Api, Resource, reqparse
 
 app = Flask(__name__) #Create Flask object app
 
 api = Api(app) #creating api object wrapping app as API
 
-class helloWorld(Resource): #Create class helloWorld inheriting from Resource class
-    def get(self): #Override get method from Resource class for class helloWorld
-        hello = {"Method":"Hello Lekau, you have just handled a GET request!"} #Create dict to return when get request is made
-        return hello 
+episode_args = reqparse.RequestParser() #creating arguments for the episode 
+#adding required arguments 
+episode_args.add_argument(name="id", type=int,help="Episode's id", required=True)
+episode_args.add_argument(name="name", type=str, help="name of episode", required=True)
+episode_args.add_argument(name="listens", type=int, help="Number of listens")
+episode_args.add_argument(name="likes", type=int, help="Number of likes")
 
-    def post(self):
-        post_data = {"method":"Hello Lekau, you have just handled a POST request!"}
-        return post_data
 
-api.add_resource(helloWorld, "/hello") #adding helloWorld class to resource with an endpoint /hello
+
+episodes = {}
+class episode(Resource): #Create class episode inheriting from Resource class to handle episode requests
+    def get(self, episode_id):
+        """"
+        Override get method from Resource class for class episode takes in self and episode_id
+        """
+        args = episode_args.parse_args()
+        return {episode_id: args}
+
+    def put(self):
+        pass
+
+api.add_resource(episode, "/episode/<int:id>") #adding episode class to resource with an endpoint /episode/<episode_id>
 
 @app.route('/')
-def hello_world():
-   return "Hello World!"
+def home():
+   return "Welcome to my Podcast World!"
 
 
 if __name__ == "__main__":
